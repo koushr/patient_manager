@@ -1,24 +1,31 @@
 package main
 
 import (
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"net/http"
-	_ "net/http/pprof"
+	"fmt"
+	"github.com/corazawaf/coraza/v2"
+	"github.com/corazawaf/coraza/v2/seclang"
 )
 
 func main() {
-	opsProcessed := promauto.NewCounter(prometheus.CounterOpts{
-		Name: "myapp_processed_ops_total",
-		Help: "The total number of processed events",
-	})
-	go func() {
-		for {
-			opsProcessed.Inc()
-		}
-	}()
+	// First we initialize our waf and our seclang parser
+	waf := coraza.NewWaf()
+	parser, _ := seclang.NewParser(waf)
 
-	http.Handle("/metrics", promhttp.Handler())
-	http.ListenAndServe(":2112", nil)
+	// Now we parse our rules
+	if err := parser.FromString(`SecRule REMOTE_ADDR "@rx .*" "id:1,phase:1,deny,status:403"`); err != nil {
+		fmt.Println(err)
+	}
+
+	// Then we create a transaction and assign some variables
+	tx := waf.NewTransaction()
+	defer func() {
+		tx.ProcessLogging()
+		tx.Clean()
+	}()
+	tx.ProcessConnection("127.0.0.1", 8080, "127.0.0.1", 12345)
+
+	// Finally we process the request headers phase, which may return an interruption
+	if it := tx.ProcessRequestHeaders(); it != nil {
+		fmt.Printf("Transaction was interrupted with status %d\n", it.Status)
+	}
 }
