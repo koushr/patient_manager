@@ -11,7 +11,7 @@ services:
       - MONGODB_REPLICA_SET_KEY=replicasetkey123
       - MONGODB_REPLICA_SET_NAME=config-replicaset
     volumes:
-#      - ${BASE_DIR}/mongo/configsvr-primary:/bitnami
+      #      - ${BASE_DIR}/mongo/configsvr-primary:/bitnami
       - /etc/localtime:/etc/localtime:ro
     networks:
       - htcc-base-net
@@ -50,13 +50,37 @@ services:
       - MONGODB_REPLICA_SET_KEY=replicasetkey123
       - MONGODB_REPLICA_SET_NAME=shard0
     volumes:
-#      - ${BASE_DIR}/mongo/shard0:/bitnami
+      #      - ${BASE_DIR}/mongo/shard0:/bitnami
       - /etc/localtime:/etc/localtime:ro
     networks:
       - htcc-base-net
     ports:
       - "27019:27019"
     restart: unless-stopped
+
+  mongodb-shard-secondary:
+    image: 'bitnami/mongodb:latest'
+    depends_on:
+      - mongodb-primary
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=mongodb-secondary
+      - MONGODB_REPLICA_SET_MODE=secondary
+      - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
+      - MONGODB_INITIAL_PRIMARY_PORT_NUMBER=27017
+      - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=password123
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+
+  mongodb-shard-arbiter:
+    image: 'bitnami/mongodb:latest'
+    depends_on:
+      - mongodb-primary
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=mongodb-arbiter
+      - MONGODB_REPLICA_SET_MODE=arbiter
+      - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
+      - MONGODB_INITIAL_PRIMARY_PORT_NUMBER=27017
+      - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=password123
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
 
 networks:
   htcc-base-net:
