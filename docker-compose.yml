@@ -1,7 +1,7 @@
 version: "3.4"
 services:
   mongodb-configsvr-primary:
-    image: 'register.htcc.com:9443/library/mongo_shard:latest'
+    image: 'bitnami/mongodb-sharded:5.0.8'
     environment:
       - MONGODB_PORT_NUMBER=27018
       - MONGODB_SHARDING_MODE=configsvr
@@ -11,8 +11,7 @@ services:
       - MONGODB_REPLICA_SET_KEY=replicasetkey123
       - MONGODB_REPLICA_SET_NAME=config-replicaset
     volumes:
-      - ${BASE_DIR}/mongo/configsvr-primary:/bitnami
-      - /etc/timezone:/etc/timezone:ro
+#      - ${BASE_DIR}/mongo/configsvr-primary:/bitnami
       - /etc/localtime:/etc/localtime:ro
     networks:
       - htcc-base-net
@@ -21,7 +20,7 @@ services:
     restart: unless-stopped
 
   mongos:
-    image: 'register.htcc.com:9443/library/mongo_shard:latest'
+    image: 'bitnami/mongodb-sharded:5.0.8'
     environment:
       - MONGODB_SHARDING_MODE=mongos
       - MONGODB_CFG_PRIMARY_HOST=${LOCATE_HOST_IP}
@@ -31,7 +30,6 @@ services:
       - MONGODB_REPLICA_SET_KEY=replicasetkey123
       - MONGODB_ROOT_PASSWORD=sBL2y7Uuxqyi
     volumes:
-      - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     ports:
       - "27017:27017"
@@ -40,7 +38,7 @@ services:
     restart: unless-stopped
 
   mongodb-shard-primary:
-    image: 'register.htcc.com:9443/library/mongo_shard:latest'
+    image: 'bitnami/mongodb-sharded:5.0.8'
     environment:
       - MONGODB_SHARDING_MODE=shardsvr
       - MONGODB_EXTRA_FLAGS=--wiredTigerCacheSizeGB=16
@@ -52,8 +50,7 @@ services:
       - MONGODB_REPLICA_SET_KEY=replicasetkey123
       - MONGODB_REPLICA_SET_NAME=shard0
     volumes:
-      - ${BASE_DIR}/mongo/shard0:/bitnami
-      - /etc/timezone:/etc/timezone:ro
+#      - ${BASE_DIR}/mongo/shard0:/bitnami
       - /etc/localtime:/etc/localtime:ro
     networks:
       - htcc-base-net
