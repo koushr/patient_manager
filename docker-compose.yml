@@ -1,0 +1,70 @@
+version: "3.4"
+services:
+  mongodb-configsvr-primary:
+    image: 'register.htcc.com:9443/library/mongo_shard:latest'
+    environment:
+      - MONGODB_PORT_NUMBER=27018
+      - MONGODB_SHARDING_MODE=configsvr
+      - MONGODB_ROOT_PASSWORD=sBL2y7Uuxqyi
+      - MONGODB_ADVERTISED_HOSTNAME=${LOCATE_HOST_IP}
+      - MONGODB_REPLICA_SET_MODE=primary
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+      - MONGODB_REPLICA_SET_NAME=config-replicaset
+    volumes:
+      - ${BASE_DIR}/mongo/configsvr-primary:/bitnami
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - htcc-base-net
+    ports:
+      - "27018:27018"
+    restart: unless-stopped
+
+  mongos:
+    image: 'register.htcc.com:9443/library/mongo_shard:latest'
+    environment:
+      - MONGODB_SHARDING_MODE=mongos
+      - MONGODB_CFG_PRIMARY_HOST=${LOCATE_HOST_IP}
+      - MONGODB_CFG_PRIMARY_PORT_NUMBER=27018
+      - MONGODB_ADVERTISED_HOSTNAME=${LOCATE_HOST_IP}
+      - MONGODB_CFG_REPLICA_SET_NAME=cfgreplicaset
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+      - MONGODB_ROOT_PASSWORD=sBL2y7Uuxqyi
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "27017:27017"
+    networks:
+      - htcc-base-net
+    restart: unless-stopped
+
+  mongodb-shard-primary:
+    image: 'register.htcc.com:9443/library/mongo_shard:latest'
+    environment:
+      - MONGODB_SHARDING_MODE=shardsvr
+      - MONGODB_EXTRA_FLAGS=--wiredTigerCacheSizeGB=16
+      - MONGODB_MONGOS_HOST=${LOCATE_HOST_IP}
+      - MONGODB_ADVERTISED_HOSTNAME=${LOCATE_HOST_IP}
+      - MONGODB_PORT_NUMBER=27019
+      - MONGODB_ROOT_PASSWORD=sBL2y7Uuxqyi
+      - MONGODB_REPLICA_SET_MODE=primary
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+      - MONGODB_REPLICA_SET_NAME=shard0
+    volumes:
+      - ${BASE_DIR}/mongo/shard0:/bitnami
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - htcc-base-net
+    ports:
+      - "27019:27019"
+    restart: unless-stopped
+
+networks:
+  htcc-base-net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.55.1/24
