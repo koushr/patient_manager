@@ -11,11 +11,8 @@ services:
       - MONGODB_REPLICA_SET_KEY=replicasetkey123
       - MONGODB_REPLICA_SET_NAME=cfgreplicaset
     volumes:
-      #      - ${BASE_DIR}/mongo/configsvr-primary:/bitnami
       - /etc/localtime:/etc/localtime:ro
     network_mode: "host"
-    #    networks:
-    #      - htcc-base-net
     ports:
       - "27018:27018"
     restart: unless-stopped
@@ -35,8 +32,6 @@ services:
     ports:
       - "27017:27017"
     network_mode: "host"
-    #    networks:
-    #      - htcc-base-net
     restart: unless-stopped
 
   mongodb-shard-primary:
@@ -50,13 +45,9 @@ services:
       - MONGODB_ADVERTISED_HOSTNAME=172.17.16.9
       - MONGODB_REPLICA_SET_MODE=primary
       - MONGODB_REPLICA_SET_KEY=replicasetkey123
-    #      - MONGODB_REPLICA_SET_NAME=shard0
     volumes:
-      #      - ${BASE_DIR}/mongo/shard0:/bitnami
       - /etc/localtime:/etc/localtime:ro
     network_mode: "host"
-    #    networks:
-    #      - htcc-base-net
     ports:
       - "27019:27019"
     restart: unless-stopped
@@ -75,21 +66,9 @@ services:
       - MONGODB_ADVERTISED_HOSTNAME=172.17.16.9
       - MONGODB_REPLICA_SET_MODE=secondary
       - MONGODB_REPLICA_SET_KEY=replicasetkey123
-    #      - MONGODB_REPLICA_SET_NAME=shard1
     volumes:
-      #      - ${BASE_DIR}/mongo/shard0:/bitnami
       - /etc/localtime:/etc/localtime:ro
     network_mode: "host"
-    #    networks:
-    #      - htcc-base-net
     ports:
       - "27020:27020"
     restart: unless-stopped
-
-#networks:
-#  htcc-base-net:
-#    driver: bridge
-#    ipam:
-#      driver: default
-#      config:
-#        - subnet: 192.168.55.1/24
