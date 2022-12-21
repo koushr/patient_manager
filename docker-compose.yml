@@ -1,7 +1,7 @@
 version: "3.4"
 services:
   mongodb-configsvr-primary:
-    image: 'bitnami/mongodb-sharded:5.0.14'
+    image: 'bitnami/mongodb-sharded:6.0.3'
     environment:
       - MONGODB_SHARDING_MODE=configsvr
       - MONGODB_PORT_NUMBER=27018
@@ -18,7 +18,7 @@ services:
     restart: unless-stopped
 
   mongos:
-    image: 'bitnami/mongodb-sharded:5.0.14'
+    image: 'bitnami/mongodb-sharded:6.0.3'
     environment:
       - MONGODB_SHARDING_MODE=mongos
       - MONGODB_ROOT_PASSWORD=sBL2y7Uuxqyi
@@ -34,8 +34,8 @@ services:
     network_mode: "host"
     restart: unless-stopped
 
-  mongodb-shard-primary:
-    image: 'bitnami/mongodb-sharded:5.0.14'
+  mongodb-shard0-primary:
+    image: 'bitnami/mongodb-sharded:6.0.3'
     environment:
       - MONGODB_SHARDING_MODE=shardsvr
       - MONGODB_EXTRA_FLAGS=--wiredTigerCacheSizeGB=0.5
@@ -45,6 +45,7 @@ services:
       - MONGODB_ADVERTISED_HOSTNAME=172.17.16.9
       - MONGODB_REPLICA_SET_MODE=primary
       - MONGODB_REPLICA_SET_KEY=replicasetkey123
+      - MONGODB_REPLICA_SET_NAME=shard0
     volumes:
       - /etc/localtime:/etc/localtime:ro
     network_mode: "host"
@@ -52,20 +53,18 @@ services:
       - "27019:27019"
     restart: unless-stopped
 
-  mongodb-shard-secondary:
-    image: 'bitnami/mongodb-sharded:5.0.14'
-    depends_on:
-      - mongodb-shard-primary
+  mongodb-shard1-primary:
+    image: 'bitnami/mongodb-sharded:6.0.3'
     environment:
       - MONGODB_SHARDING_MODE=shardsvr
       - MONGODB_EXTRA_FLAGS=--wiredTigerCacheSizeGB=0.5
       - MONGODB_PORT_NUMBER=27020
-      - MONGODB_INITIAL_PRIMARY_HOST=172.17.16.9
-      - MONGODB_INITIAL_PRIMARY_PORT_NUMBER=27019
-      - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=sBL2y7Uuxqyi
+      - MONGODB_ROOT_PASSWORD=sBL2y7Uuxqyi
+      - MONGODB_MONGOS_HOST=172.17.16.9
       - MONGODB_ADVERTISED_HOSTNAME=172.17.16.9
-      - MONGODB_REPLICA_SET_MODE=secondary
+      - MONGODB_REPLICA_SET_MODE=primary
       - MONGODB_REPLICA_SET_KEY=replicasetkey123
+      - MONGODB_REPLICA_SET_NAME=shard1
     volumes:
       - /etc/localtime:/etc/localtime:ro
     network_mode: "host"
