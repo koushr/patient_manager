@@ -53,12 +53,34 @@ services:
       - "27019:27019"
     restart: unless-stopped
 
+  mongodb-shard0-secondary:
+    image: 'bitnami/mongodb-sharded:6.0.3'
+    depends_on:
+      - mongodb-shard0-primary
+    environment:
+      - MONGODB_SHARDING_MODE=shardsvr
+      - MONGODB_EXTRA_FLAGS=--wiredTigerCacheSizeGB=0.5
+      - MONGODB_PORT_NUMBER=27020
+      - MONGODB_INITIAL_PRIMARY_HOST=172.17.16.9
+      - MONGODB_INITIAL_PRIMARY_PORT_NUMBER=27019
+      - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=sBL2y7Uuxqyi
+      - MONGODB_ADVERTISED_HOSTNAME=172.17.16.9
+      - MONGODB_REPLICA_SET_MODE=secondary
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+      - MONGODB_REPLICA_SET_NAME=shard0
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    network_mode: "host"
+    ports:
+      - "27020:27020"
+    restart: unless-stopped
+
   mongodb-shard1-primary:
     image: 'bitnami/mongodb-sharded:6.0.3'
     environment:
       - MONGODB_SHARDING_MODE=shardsvr
       - MONGODB_EXTRA_FLAGS=--wiredTigerCacheSizeGB=0.5
-      - MONGODB_PORT_NUMBER=27020
+      - MONGODB_PORT_NUMBER=27021
       - MONGODB_ROOT_PASSWORD=sBL2y7Uuxqyi
       - MONGODB_MONGOS_HOST=172.17.16.9
       - MONGODB_ADVERTISED_HOSTNAME=172.17.16.9
@@ -69,5 +91,5 @@ services:
       - /etc/localtime:/etc/localtime:ro
     network_mode: "host"
     ports:
-      - "27020:27020"
+      - "27021:27021"
     restart: unless-stopped
